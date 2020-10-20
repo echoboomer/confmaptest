@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cfmaptest
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cfmaptest
+  namespace: default
+rules:
+  - apiGroups:
+      - ''
+    resources:
+      - pods
+    verbs:
+      - list
+      - get
+      - watch
+  - apiGroups:
+      - ''
+    resources:
+      - configmaps
+    verbs:
+      - create
+      - list
+      - get
+      - update
+      - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cfmaptest
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cfmaptest
+subjects:
+  - kind: ServiceAccount
+    name: cfmaptest
+    namespace: default
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cfmaptest
+  namespace: default
+spec:
+  serviceAccountName: cfmaptest
+  containers:
+    - name: cfmaptest
+      image: eb129/cfmap:latest
+      command: ['/bin/bash', '-c', '--']
+      args: ['while true; do sleep 30; done;']
+  restartPolicy: Never
